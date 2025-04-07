@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gas Due for Property</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      font-size: 24px;
+      text-align: center;
+    }
+    input, button {
+      font-size: 16px;
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .property {
+      background: #fff;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .done {
+      text-decoration: line-through;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Gas Due for Property</h1>
+
+  <input id="propertyName" placeholder="Property Name or Address" />
+  <input id="dueDate" type="date" />
+  <button onclick="addProperty()">Add Property</button>
+
+  <div id="propertyList"></div>
+
+  <script>
+    const defaultProperties = [
+      { name: "N & D Pau - Harrison Road", dueDate: "2025-07-06", done: false },
+      { name: "N & D Pau - 17 Shearer Close", dueDate: "2025-08-28", done: false },
+      { name: "Mr Nishit & Kiran Sachdev - Bluebell Drive", dueDate: "2026-03-09", done: false },
+      { name: "N & D Pau - Kincraig Road", dueDate: "2025-08-28", done: false },
+      { name: "N & D Pau - Klimsford Close", dueDate: "2025-08-28", done: false },
+      { name: "Atul & Reshma Manek - Brandon Street", dueDate: "2025-07-06", done: false },
+      { name: "N & D Pau - 17 Jeremy Close", dueDate: "2025-07-06", done: false },
+      { name: "N & D Pau - 39 Jeremy Close", dueDate: "2026-03-09", done: false },
+      { name: "Mr Nishit & Kiran Sachdev - 13 Kincaple Road", dueDate: "2025-08-28", done: false },
+      { name: "Mr Nishit & Kiran Sachdev - Selkirk Road", dueDate: "2025-09-16", done: false },
+      { name: "DILIP PATTANI & R PAU - Doncaster Road", dueDate: "2025-09-16", done: false },
+      { name: "N & D Pau - Kendal Road", dueDate: "2025-08-28", done: false },
+      { name: "N & D Pau - 256 London Road Flat/Shop", dueDate: "2025-06-17", done: false },
+      { name: "Mr Nikesh & Jitesh Khakhar - Huntsman Way Nikesh", dueDate: "2025-09-16", done: false },
+      { name: "Rahul Pau - Station St East", dueDate: "2026-01-01", done: false },
+      { name: "Rahul Pau - Ransom rd", dueDate: "2026-03-16", done: false },
+      { name: "Kaushik Patel - Lancashire Street", dueDate: "2026-03-04", done: false },
+      { name: "Rahul Pau - 9 Coles Close", dueDate: "2025-07-06", done: false }
+      // Add more entries as needed
+    ];
+
+    const properties = JSON.parse(localStorage.getItem("properties") || JSON.stringify(defaultProperties));
+
+    function save() {
+      localStorage.setItem("properties", JSON.stringify(properties));
+    }
+
+    function render() {
+      const list = document.getElementById("propertyList");
+      list.innerHTML = "";
+      const today = new Date();
+      properties.forEach((prop, index) => {
+        const due = new Date(prop.dueDate);
+        const diffDays = Math.floor((due - today) / (1000 * 60 * 60 * 24));
+        const item = document.createElement("div");
+        item.className = "property" + (prop.done ? " done" : "");
+        item.innerHTML = `
+          <strong>${prop.name}</strong><br>
+          Due: ${prop.dueDate} (${diffDays} days left)<br>
+          <button onclick="markDone(${index})">Mark as Done</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function addProperty() {
+      const name = document.getElementById("propertyName").value.trim();
+      const dueDate = document.getElementById("dueDate").value;
+      if (!name || !dueDate) return alert("Please fill both fields.");
+      properties.push({ name, dueDate, done: false });
+      save();
+      render();
+    }
+
+    function markDone(index) {
+      const oldDate = new Date(properties[index].dueDate);
+      oldDate.setFullYear(oldDate.getFullYear() + 1);
+      properties[index].dueDate = oldDate.toISOString().split("T")[0];
+      properties[index].done = false;
+      save();
+      render();
+    }
+
+    function notifyUser(property) {
+      if (Notification.permission === "granted") {
+        const due = new Date(property.dueDate);
+        const today = new Date();
+        const diffDays = Math.floor((due - today) / (1000 * 60 * 60 * 24));
+        if (diffDays === 30 || diffDays === 14) {
+          new Notification("Reminder for " + property.name, {
+            body: `Gas due in ${diffDays} days on ${property.dueDate}`
+          });
+        }
+      }
+    }
+
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    properties.forEach(notifyUser);
+    render();
+  </script>
+
+</body>
+</html>
