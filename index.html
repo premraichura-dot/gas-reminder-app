@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gas Due for Property</title>
   <link rel="manifest" href="manifest.json">
   <style>
@@ -68,7 +68,11 @@
       { name: "Rahul Pau - 9 Coles Close", dueDate: "2025-07-06", done: false }
     ];
 
-    const properties = JSON.parse(localStorage.getItem("properties") || JSON.stringify(defaultProperties));
+    let properties = JSON.parse(localStorage.getItem("properties"));
+    if (!properties || !Array.isArray(properties) || properties.length === 0) {
+      properties = [...defaultProperties];
+      localStorage.setItem("properties", JSON.stringify(properties));
+    }
 
     function formatDateUK(dateStr) {
       const [year, month, day] = dateStr.split("-");
