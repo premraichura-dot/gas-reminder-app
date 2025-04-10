@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gas Due for Property</title>
+  <link rel="manifest" href="manifest.json">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -64,10 +66,14 @@
       { name: "Rahul Pau - Ransom rd", dueDate: "2026-03-16", done: false },
       { name: "Kaushik Patel - Lancashire Street", dueDate: "2026-03-04", done: false },
       { name: "Rahul Pau - 9 Coles Close", dueDate: "2025-07-06", done: false }
-      // Add more entries as needed
     ];
 
     const properties = JSON.parse(localStorage.getItem("properties") || JSON.stringify(defaultProperties));
+
+    function formatDateUK(dateStr) {
+      const [year, month, day] = dateStr.split("-");
+      return `${day}/${month}/${year}`;
+    }
 
     function save() {
       localStorage.setItem("properties", JSON.stringify(properties));
@@ -84,7 +90,7 @@
         item.className = "property" + (prop.done ? " done" : "");
         item.innerHTML = `
           <strong>${prop.name}</strong><br>
-          Due: ${prop.dueDate} (${diffDays} days left)<br>
+          Due: ${formatDateUK(prop.dueDate)} (${diffDays} days left)<br>
           <button onclick="markDone(${index})">Mark as Done</button>
         `;
         list.appendChild(item);
@@ -116,7 +122,7 @@
         const diffDays = Math.floor((due - today) / (1000 * 60 * 60 * 24));
         if (diffDays === 30 || diffDays === 14) {
           new Notification("Reminder for " + property.name, {
-            body: `Gas due in ${diffDays} days on ${property.dueDate}`
+            body: `Gas due in ${diffDays} days on ${formatDateUK(property.dueDate)}`
           });
         }
       }
